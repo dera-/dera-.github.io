@@ -1,5 +1,13 @@
 #ChangeLog
 
+## 0.0.5
+ついか
+* sasss
+  * aaaaaaaaa
+* gadasas
+  * hoge
+    * ????
+
 ## 0.0.4
 またついか
 * hogehoge
