@@ -1,5 +1,14 @@
 #ChangeLog
 
+## 0.0.6
+tesuto
+機能追加
+* aの機能
+  * 詳細
+* hoge-
+  * fuga-
+    * aaaaaa
+
 ## 0.0.5
 ついか
 * sasss
