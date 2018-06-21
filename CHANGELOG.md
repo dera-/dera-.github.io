@@ -1,5 +1,11 @@
 #ChangeLog
 
+## 0.0.4
+またついか
+* hogehoge
+** aaaabbb
+* 12345
+
 ## 0.0.3
 以下を追加
 * hoge
