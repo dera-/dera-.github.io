@@ -7801,6 +7801,7 @@ var player_1 = require("./player");
 var DynamicFontRepository_1 = require("./repository/DynamicFontRepository");
 var GAServiceForDerarara_1 = require("./service/GAServiceForDerarara");
 module.exports = function (param) {
+    var gaService = new GAServiceForDerarara_1.GAServiceForDerarara("imaslot");
     var scene = new g.Scene({
         game: g.game,
         assetIds: [
@@ -7980,7 +7981,7 @@ module.exports = function (param) {
                 // TODO お金が増えたエフェクトと演出
                 player.addMoney(slot.calculateScore());
                 slot.refresh();
-                GAServiceForDerarara_1.GAServiceForDerarara.instance.sendScore(player.money);
+                gaService.sendScore(player.money);
             }
             // 表情変化 TODO: なんかRepositoryクラスとかで管理したい
             if (player.currentCharaStatus !== "nata_muri" && !player.canContinue()) {
@@ -8000,7 +8001,6 @@ module.exports = function (param) {
         // 	console.error(e);
         // });
     });
-    GAServiceForDerarara_1.GAServiceForDerarara.initialize("imaslot");
     g.game.pushScene(scene);
 };
 
@@ -8143,16 +8143,6 @@ exports.Player = Player;
 				window.gLocalAssetContainer["slot"] = function(g) {
 			(function(exports, require, module, __filename, __dirname) {
 "use strict";
-var __values = (this && this.__values) || function (o) {
-    var m = typeof Symbol === "function" && o[Symbol.iterator], i = 0;
-    if (m) return m.call(o);
-    return {
-        next: function () {
-            if (o && i >= o.length) o = void 0;
-            return { value: o && o[i++], done: !o };
-        }
-    };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 var config_1 = require("./config");
 var prise = 20;
@@ -8162,6 +8152,10 @@ var maxSpeed = 2000 / 30; // スロットのスピンの最大速度(フレー�
 var acceleration = maxSpeed / 45; // スロットのスピンの加速度
 var minusAcceleration = maxSpeed / 30; // ストップボタン押された後のスロットのスピンの加速度
 var lineElements = [
+    // 上の3行はテスト用
+    // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24],
     [24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1],
     [4, 7, 10, 13, 16, 19, 22, 0, 3, 6, 9, 12, 15, 18, 21, 24, 2, 5, 8, 11, 14, 17, 20, 23, 1]
@@ -8214,42 +8208,46 @@ var Slot = /** @class */ (function () {
         });
     };
     Slot.prototype.calculateScore = function () {
-        // 1列のみ評価
-        var currentNumber;
-        console.log("calculate");
-        try {
-            for (var _a = __values(this._reels), _b = _a.next(); !_b.done; _b = _a.next()) {
-                var reel = _b.value;
-                console.log(reel.getCurrentNumber());
+        var _this = this;
+        // console.log("calculate");
+        // for (const reel of this._reels) {
+        // 	console.log(reel.getCurrentNumber());
+        // }
+        var dividends = 0;
+        var displayed = this._reels.map(function (reel) { return reel.getCurrentNumbers(); });
+        console.log("displayed", displayed);
+        var evaluations = [
+            {
+                place: [0, 0, 0],
+                ozz: 1.0
+            },
+            {
+                place: [1, 1, 1],
+                ozz: 1.5
+            },
+            {
+                place: [2, 2, 2],
+                ozz: 1.0
+            },
+            {
+                place: [0, 1, 2],
+                ozz: 1.0
+            },
+            {
+                place: [2, 1, 0],
+                ozz: 1.0
             }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
-            try {
-                if (_b && !_b.done && (_c = _a.return)) _c.call(_a);
+        ];
+        evaluations.forEach(function (ev) {
+            console.log(displayed[0][ev.place[0]], displayed[1][ev.place[1]], displayed[2][ev.place[2]]);
+            if (displayed[0][ev.place[0]] === displayed[1][ev.place[1]]
+                && displayed[0][ev.place[0]] === displayed[2][ev.place[2]]) {
+                console.log("hit");
+                dividends += ev.ozz * prise * _this.magnification;
+                console.log(dividends);
             }
-            finally { if (e_1) throw e_1.error; }
-        }
-        try {
-            for (var _d = __values(this._reels), _e = _d.next(); !_e.done; _e = _d.next()) {
-                var reel = _e.value;
-                if (currentNumber === undefined) {
-                    currentNumber = reel.getCurrentNumber();
-                }
-                else if (reel.getCurrentNumber() !== currentNumber) {
-                    return 0;
-                }
-            }
-        }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (_e && !_e.done && (_f = _d.return)) _f.call(_d);
-            }
-            finally { if (e_2) throw e_2.error; }
-        }
-        return prise * this.magnification;
-        var e_1, _c, e_2, _f;
+        });
+        return dividends;
     };
     Slot.prototype.refresh = function () {
         this.betValue = 0;
@@ -8284,6 +8282,11 @@ var Reel = /** @class */ (function () {
     });
     Reel.prototype.getCurrentNumber = function () {
         return this._elements[this._currentIndex];
+    };
+    Reel.prototype.getCurrentNumbers = function () {
+        var upperIndex = this._currentIndex === 0 ? this._elements.length - 1 : this._currentIndex - 1;
+        var downerIndex = (this._currentIndex + 1) % this._elements.length;
+        return [this._elements[upperIndex], this._elements[this._currentIndex], this._elements[downerIndex]];
     };
     Reel.prototype.spin = function () {
         var _this = this;
@@ -8353,6 +8356,10 @@ var Reel = /** @class */ (function () {
             var max = 2 * config_1.config.game.slot.reel.element.height + config_1.config.game.slot.reel.element.dy;
             if (min <= sprite.y && sprite.y < max) {
                 this._currentIndex = i * elementCount + elementCount - Math.ceil((sprite.y - min) / config_1.config.game.slot.reel.element.width);
+                if (this._currentIndex < 0) {
+                    this._currentIndex = this._elements.length + this._currentIndex;
+                }
+                this._currentIndex = this._currentIndex % this._elements.length;
                 break;
             }
         }
@@ -8410,8 +8417,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var nico_analytics_1 = require("@akashic-extension/nico-analytics");
 var GAServiceForDerarara = /** @class */ (function (_super) {
     __extends(GAServiceForDerarara, _super);
-    function GAServiceForDerarara() {
-        return _super !== null && _super.apply(this, arguments) || this;
+    function GAServiceForDerarara(gameTitle) {
+        return _super.call(this, gameTitle) || this;
     }
     GAServiceForDerarara.prototype.createEventData = function (data) {
         var eventLabel = "playablead-" + data.title;
