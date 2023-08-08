@@ -1,2 +1,4 @@
 theme: jekyll-theme-slate
 google_analytics: UA-121327184-1
+plugins:
+  - jekyll-redirect-from
